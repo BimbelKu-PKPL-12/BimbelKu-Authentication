@@ -40,6 +40,10 @@ class UserLoginView(APIView):
                 return Response({'error': 'Invalid email or password'}, status=status.HTTP_401_UNAUTHORIZED)
             
             refresh = RefreshToken.for_user(user)
+            refresh['role'] = user.role
+            refresh['user_id'] = user.id
+            refresh['username'] = user.username
+            refresh['email'] = user.email
             user_data = UserSerializer(user).data
             
             # Menentukan redirect URL berdasarkan role
