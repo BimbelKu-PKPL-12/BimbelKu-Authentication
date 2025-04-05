@@ -13,14 +13,11 @@ class User(AbstractUser):
         message='Username hanya boleh berisi huruf, angka, spasi, dan karakter @/./+/-/_.'
     )
     
-    # Override field username
     username = models.CharField(
         max_length=150,
-        unique=True,
+        unique=False,
         validators=[username_validator],
-        error_messages={
-            'unique': "Username ini sudah digunakan.",
-        },
+        error_messages={}
     )
     
     email = models.EmailField(unique=True)
