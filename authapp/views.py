@@ -44,11 +44,14 @@ class UserLoginView(APIView):
             refresh['user_id'] = user.id
             refresh['username'] = user.username
             refresh['email'] = user.email
+            refresh['is_superuser'] = user.is_superuser  # Add is_superuser claim
             user_data = UserSerializer(user).data
             
             # Menentukan redirect URL berdasarkan role
             redirect_url = ""
-            if user.role == 'admin':
+            if user.role == 'superadmin' or user.is_superuser:  # Consider both conditions
+                redirect_url = "/superadmin-dashboard"  # Endpoint untuk superadmin
+            elif user.role == 'admin':
                 redirect_url = "/admin-dashboard"  # Endpoint untuk Bimbelku-Bimbel-Backend
             else:
                 redirect_url = "/siswa-dashboard"  # Endpoint untuk Bimbelku-User-Backend

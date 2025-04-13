@@ -1,9 +1,24 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, UserManager
 from django.core.validators import RegexValidator
+
+class CustomUserManager(UserManager):
+    def create_superuser(self, username, email=None, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        # Explicitly set role to superadmin for superusers created through manage.py
+        extra_fields['role'] = 'superadmin'
+        
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('Superuser must have is_staff=True.')
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('Superuser must have is_superuser=True.')
+            
+        return self._create_user(username, email, password, **extra_fields)
 
 class User(AbstractUser):
     ROLE_CHOICES = (
+        ('superadmin', 'Super Admin'),
         ('admin', 'Admin Bimbel'),
         ('siswa', 'Siswa'),
     )
@@ -21,6 +36,7 @@ class User(AbstractUser):
     )
     
     email = models.EmailField(unique=True)
+    # Keep default as siswa for security reasons
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='siswa')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -32,6 +48,9 @@ class User(AbstractUser):
     
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
+    
+    # Use our custom manager
+    objects = CustomUserManager()
     
     def __str__(self):
         return f"{self.username} ({self.get_role_display()})"

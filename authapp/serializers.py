@@ -20,6 +20,10 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         if attrs['password'] != attrs['password2']:
             raise serializers.ValidationError({"password": "Password fields didn't match."})
         
+        # Prevent users from registering as superadmin through API
+        if attrs.get('role') == 'superadmin':
+            raise serializers.ValidationError({"role": "Cannot register with superadmin role."})
+        
         # Validasi field tambahan untuk siswa
         if attrs.get('role') == 'siswa':
             if not attrs.get('no_telp'):
@@ -57,4 +61,5 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'username', 'email', 'role',
-                 'no_telp', 'tanggal_lahir', 'alamat')
+                 'no_telp', 'tanggal_lahir', 'alamat', 'is_superuser')
+        read_only_fields = ('is_superuser',)
